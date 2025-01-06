@@ -17,11 +17,11 @@ import {
   setupVNC
 } from "../tool/index"
 import AppTray from "./AppTray"
-const { spawn, exec } = require("child_process")
+const { exec } = require("child_process")
 const path = require("path")
 const fs = require("fs")
 const config = getSystemConfig()
-const { width = 1920, height = 1080, enginePath, remoteServer, isStartEngine = false } = config
+const { width = 1920, height = 1080, remoteServer } = config
 const configPath = path.join(AppConfig.IS_DEV_MODE ? __dirname : process.resourcesPath, "../config.js")
 
 export default class WinMain {
@@ -88,34 +88,6 @@ export default class WinMain {
     // 启用 remote
     remote.enable(this.winInst.webContents)
     // AppConfig.IS_DEV_MODE && this.openDevtool()
-
-    // 启动指定路径的exe文件
-    let exeProcess
-
-    if (isStartEngine && enginePath) {
-      printf("[引擎目录地址]", enginePath)
-      if (fs.existsSync(enginePath)) {
-        const exeName = path.basename(enginePath)
-        const isRunning = await checkIfProcessRunning(exeName)
-        if (isRunning) {
-          console.log(`[引擎已经启动] ${exeName} 正在运行`)
-          await this.closeExeProcess(enginePath)
-        }
-
-        exeProcess = spawn(enginePath, [], { shell: false })
-        printf(`[引擎启动中]`)
-
-        exeProcess.stdout.on("data", (data) => {
-          if (data.includes("Game Engine Initialized")) {
-            printf(`[引擎启动完成]`)
-          }
-        })
-      } else {
-        WinMain.showMessageBox(`[引擎启动失败] 找不到可执行文件: ${enginePath}`)
-        printf(`[引擎启动失败] 找不到可执行文件: ${enginePath}`)
-      }
-    }
-
     if (remoteServer.connectIp) {
       RemoteServer.createRemoteServer()
     }
@@ -147,9 +119,6 @@ export default class WinMain {
     // 窗口-已关闭
     this.winInst.on("closed", () => {
       console.log("窗口已关闭")
-      if (exeProcess) {
-        this.closeExeProcess(enginePath)
-      }
       if (remoteServer) RemoteServer.stopWebsockify()
       printf("[main.win.已关闭]", "<closed>")
       this.winInst?.removeAllListeners()
