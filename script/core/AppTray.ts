@@ -95,7 +95,7 @@ export default class AppTray {
     }
     let settingWindow: any = new BrowserWindow({
       width: 550,
-      height: 285,
+      height: 185,
       title: "设置",
       alwaysOnTop: true,
       minimizable: false, // 禁用最小化按钮

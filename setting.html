@@ -20,25 +20,6 @@
             border: 1px solid #ccc;
             border-radius: 4px;
           }
-          input.checkbox {
-            width: 12px;
-          }
-        }
-        .engineRow {
-          input {
-            width: calc(100% - 200px);
-            padding: 5px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-          }
-          button {
-            width: 80px;
-            text-align: center;
-            height: 28px;
-            line-height: 24px;
-            margin: 0 auto;
-            cursor: pointer;
-          }
         }
         .row1 {
           text-align: right;
@@ -68,15 +49,6 @@
         <label for="localPort">web访问端口:</label>
         <input type="number" id="localPort" name="localPort" placeholder="请输入web访问端口" />
       </div>
-      <div class="row">
-        <label for="isStartEngine">是否启动引擎:</label>
-        <input type="checkbox" id="isStartEngine" name="isStartEngine" class="checkbox" />
-      </div>
-      <div class="row engineRow" id="enginePathRow">
-        <label for="enginePath">引擎启动程序:</label>
-        <input type="text" id="enginePath" name="enginePath" readonly placeholder="请选择引擎启动程序" />
-        <button type="button" id="engineBtn">选择引擎</button>
-      </div>
       <div class="row1">
         <button type="submit" class="submit">保存</button>
       </div>
@@ -84,16 +56,9 @@
 
     <script>
       const { ipcRenderer } = require("electron")
-
-      const isStartEngineCheckbox = document.getElementById("isStartEngine")
-      const enginePathInput = document.getElementById("enginePath")
-      const engineBtn = document.getElementById("engineBtn")
-      const enginePathRow = document.getElementById("enginePathRow")
       document.getElementById("config-form").addEventListener("submit", () => {
         event.preventDefault()
         const newConfig = {
-          enginePath: enginePathInput.value,
-          isStartEngine: document.getElementById("isStartEngine").checked,
           remoteServer: {
             localPort: parseInt(document.getElementById("localPort").value, 10),
             connectIp: document.getElementById("connectIp").value
@@ -104,26 +69,10 @@
 
       ipcRenderer.on("config-loaded", (event, config) => {
         console.log("config-loaded", config)
-        const { isStartEngine = false, enginePath, remoteServer = {} } = config
+        const { remoteServer = {} } = config
         const { localPort = "", connectIp = "" } = remoteServer
-        document.getElementById("isStartEngine").checked = isStartEngine
-        enginePathInput.value = enginePath
         document.getElementById("localPort").value = localPort
         document.getElementById("connectIp").value = connectIp
-        enginePathRow.style.display = isStartEngine ? "block" : "none"
-      })
-
-      isStartEngineCheckbox.addEventListener("change", () => {
-        if (isStartEngineCheckbox.checked) {
-          enginePathRow.style.display = "block"
-        } else {
-          enginePathRow.style.display = "none"
-        }
-      })
-
-      engineBtn.addEventListener("click", async () => {
-        const selectedFilePath = await ipcRenderer.invoke("dialog:open")
-        if (selectedFilePath) enginePathInput.value = selectedFilePath
       })
 
       ipcRenderer.send("load-config") // 请求加载当前配置
