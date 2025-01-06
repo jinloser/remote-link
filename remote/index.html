@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>远程访问</title>
+    <link rel="stylesheet" href="/remote/index.css" />
+
+    <script type="module" crossorigin="anonymous">
+      // RFB holds the API to connect and communicate with a VNC server
+      import RFB from "/remote/rfb.js"
+
+      let rfb
+      let desktopName
+      let isShowSetting = false
+
+      // When this function is called we have
+      // successfully connected to a server
+      function connectedToServer(e) {}
+
+      // This function is called when we are disconnected
+      function disconnectedFromServer(e) {}
+
+      // When this function is called, the server requires
+      // credentials to authenticate
+      function credentialsAreRequired(e) {
+        const password = prompt("Password Required:")
+        rfb.sendCredentials({ password: password })
+      }
+
+      // When this function is called we have received
+      // a desktop name from the server
+      function updateDesktopName(e) {
+        desktopName = e.detail.name
+      }
+
+      // Since most operating systems will catch Ctrl+Alt+Del
+      // before they get a chance to be intercepted by the browser,
+      // we provide a way to emulate this key sequence.
+      function sendCtrlAltDel() {
+        rfb.sendCtrlAltDel()
+        return false
+      }
+
+      // This function extracts the value of one variable from the
+      // query string. If the variable isn't defined in the URL
+      // it returns the default value instead.
+      function readQueryVariable(name, defaultValue) {
+        // A URL with a query parameter can look like this:
+        // https://www.example.com?myqueryparam=myvalue
+        //
+        // Note that we use location.href instead of location.search
+        // because Firefox < 53 has a bug w.r.t location.search
+        const re = new RegExp(".*[?&]" + name + "=([^&#]*)"),
+          match = document.location.href.match(re)
+
+        if (match) {
+          // We have to decode the URL since want the cleartext value
+          return decodeURIComponent(match[1])
+        }
+
+        return defaultValue
+      }
+
+      // document.getElementById("sendCtrlAltDelButton").onclick = sendCtrlAltDel
+
+      // Read parameters specified in the URL query string
+      // By default, use the host and port of server that served this file
+      const host = readQueryVariable("host", window.location.hostname)
+      let port = readQueryVariable("port", window.location.port)
+      const password = readQueryVariable("password")
+      const path = readQueryVariable("path", "websockify")
+
+      // | | |         | | |
+      // | | | Connect | | |
+      // v v v         v v v
+
+      // Build the websocket URL used to connect
+      let url
+      if (window.location.protocol === "https:") {
+        url = "wss"
+      } else {
+        url = "ws"
+      }
+      url += "://" + host
+      if (port) {
+        url += ":" + port
+      }
+      url += "/" + path
+
+      // Creating a new RFB object will start a new connection
+      rfb = new RFB(document.getElementById("screen"), url, {
+        credentials: {
+          password: password,
+          scaleViewport: true // 自动缩放内容
+        }
+      })
+
+      // Add listeners to important events from the RFB module
+      rfb.addEventListener("connect", connectedToServer)
+      rfb.addEventListener("disconnect", disconnectedFromServer)
+      rfb.addEventListener("credentialsrequired", credentialsAreRequired)
+      rfb.addEventListener("desktopname", updateDesktopName)
+
+      // Set parameters that can be changed on an active connection
+      rfb.viewOnly = readQueryVariable("view_only", false) //是否仅查看
+      rfb.scaleViewport = readQueryVariable("scale", true) //是否自适应缩放
+      // rfb.qualityLevel = 0 //质量等级 0-9
+      // rfb.compressionLevel = 0 //压缩等级 0-9
+
+      function toggleFullscreen() {
+        if (
+          document.fullscreenElement || // alternative standard method
+          document.mozFullScreenElement || // currently working methods
+          document.webkitFullscreenElement ||
+          document.msFullscreenElement
+        ) {
+          if (document.exitFullscreen) {
+            document.exitFullscreen()
+          } else if (document.mozCancelFullScreen) {
+            document.mozCancelFullScreen()
+          } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen()
+          } else if (document.msExitFullscreen) {
+            document.msExitFullscreen()
+          }
+        } else {
+          if (document.documentElement.requestFullscreen) {
+            document.documentElement.requestFullscreen()
+          } else if (document.documentElement.mozRequestFullScreen) {
+            document.documentElement.mozRequestFullScreen()
+          } else if (document.documentElement.webkitRequestFullscreen) {
+            document.documentElement.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT)
+          } else if (document.body.msRequestFullscreen) {
+            document.body.msRequestFullscreen()
+          }
+        }
+      }
+
+      ;["qualityLevel", "compressionLevel"].forEach((item) => {
+        document.getElementById(item).addEventListener("input", (event) => {
+          changeAttr(item, event.target.value)
+        })
+      })
+
+      function changeAttr(key, value) {
+        console.log(key, value)
+        const valueText = document.getElementById(key + "Value")
+        valueText.innerHTML = value
+        rfb[key] = value * 1
+      }
+
+      function toggleSetting() {
+        document.getElementById("setting-content").className = isShowSetting ? "hide" : "show"
+        isShowSetting = !isShowSetting
+      }
+
+      document.getElementById("setting_btn").addEventListener("click", () => {
+        toggleSetting()
+      })
+    </script>
+  </head>
+
+  <body>
+    <div id="setting_btn">⚙️</div>
+    <div id="setting-content">
+      <div class="title">⚙️<span>连接设置</span></div>
+      <div class="row">
+        <label for="qualityLevel">质量等级</label>
+        <input
+          class="glow"
+          type="range"
+          min="0"
+          max="9"
+          value="6"
+          style="--val: 6"
+          id="qualityLevel"
+          oninput="this.style='--val:'+this.value"
+        />
+        <span id="qualityLevelValue">6</span>
+      </div>
+      <div class="row">
+        <label for="compressionLevel">压缩等级</label>
+        <input
+          class="glow"
+          type="range"
+          min="0"
+          max="9"
+          value="2"
+          style="--val: 2"
+          id="compressionLevel"
+          oninput="this.style='--val:'+this.value"
+        />
+        <span id="compressionLevelValue">2</span>
+      </div>
+    </div>
+    <div id="screen">
+      <!-- This is where the remote screen will appear -->
+    </div>
+  </body>
+</html>

@@ -1,0 +1,163 @@
+{
+  "name": "GRL",
+  "version": "1.1.0",
+  "description": "GRL",
+  "main": "dist/index.js",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "env": {
+    "host": "127.0.0.1",
+    "port": 13333
+  },
+  "scripts": {
+    "set-utf-8": "node -e \" process.platform === 'win32' && require('child_process').exec('chcp 65001'); \"",
+    "dev": "pnpm set-utf-8 && vite",
+    "build": "vite build && electron-builder",
+    "build:dir": "vite build && electron-builder --dir",
+    "build:linux": "vite build && electron-builder --linux",
+    "build:macos": "vite build && electron-builder --macos",
+    "build:win-x64": "vite build && electron-builder --win --x64",
+    "build:win-x32": "vite build && electron-builder --win --ia32",
+    "lint:eslint": "eslint --cache --max-warnings 0 \"{script,src,types}/**/*.{vue,js,jsx,ts,tsx}\" --fix",
+    "lint:prettier": "prettier --write \"{script,src,types}/**/*.{vue,js,jsx,ts,tsx,json,css,less,scss,html,md}\"",
+    "lint": "pnpm lint:eslint && pnpm lint:prettier"
+  },
+  "build": {
+    "productName": "GRL",
+    "appId": "com.app.GRL",
+    "directories": {
+      "output": "release/${name}-v${version}-${platform}"
+    },
+    "files": [
+      "dist/**/*",
+      "static/**/*",
+      "websockify.js"
+    ],
+    "extraResources": [
+      {
+        "from": "static/icons/logo.png",
+        "to": "${productName}.png"
+      }
+    ],
+    "extraFiles": [
+      {
+        "from": "remote",
+        "to": "remote"
+      },
+      {
+        "from": "script/config.js",
+        "to": "config.js"
+      },
+      {
+        "from": "script/remote.msi",
+        "to": "remote.msi"
+      },
+      {
+        "from": "setting.html",
+        "to": "setting.html"
+      }
+    ],
+    "publish": [
+      {
+        "provider": "generic",
+        "url": ""
+      }
+    ],
+    "asar": false,
+    "nsis": {
+      "oneClick": false,
+      "perMachine": true,
+      "shortcutName": "${productName}",
+      "uninstallDisplayName": "${productName}",
+      "runAfterFinish": true,
+      "deleteAppDataOnUninstall": true,
+      "allowToChangeInstallationDirectory": true
+    },
+    "win": {
+      "icon": "static/icons/logo_256x256.ico",
+      "artifactName": "${productName} v${version} ${arch}.${ext}",
+      "requestedExecutionLevel": "requireAdministrator",
+      "target": "nsis",
+      "sign": false
+    },
+    "dmg": {
+      "sign": false
+    },
+    "pkg": {
+      "allowAnywhere": false,
+      "isRelocatable": false,
+      "isVersionChecked": false
+    },
+    "mac": {
+      "category": "public.app-category.productivity",
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "icon": "static/icons/logo_256x256.icns",
+      "artifactName": "${productName} v${version} MacOS ${arch}.${ext}",
+      "identity": null,
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false
+    },
+    "linux": {
+      "category": "Utility",
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "icon": "static/icons/logo_256x256.png",
+      "artifactName": "${productName} v${version} ${platform} ${arch}.${ext}",
+      "desktop": {
+        "Icon": "/opt/GRL/resources/GRL.png"
+      }
+    }
+  },
+  "dependencies": {
+    "@electron/remote": "2.1.2",
+    "dayjs": "1.11.13",
+    "electron-log": "5.2.0",
+    "express": "4.21.1",
+    "iconv-lite": "0.6.3",
+    "optimist": "^0.6.1",
+    "ps-list": "8.1.1",
+    "winreg": "1.2.5",
+    "ws": "8.18.0"
+  },
+  "devDependencies": {
+    "@types/node": "22.7.5",
+    "@typescript-eslint/eslint-plugin": "8.7.0",
+    "@typescript-eslint/parser": "8.7.0",
+    "electron": "32.2.0",
+    "electron-builder": "25.1.8",
+    "eslint": "8.57.1",
+    "eslint-plugin-prettier": "5.2.1",
+    "eslint-plugin-vue": "9.28.0",
+    "lint-staged": "15.2.10",
+    "prettier": "3.3.3",
+    "typescript": "5.6.3",
+    "vite": "5.4.8",
+    "vite-electron-plugin": "0.8.3"
+  },
+  "lint-staged": {
+    "*.{vue,js,jsx,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{css,less,scss,html,md}": [
+      "prettier --write"
+    ],
+    "package.json": [
+      "prettier --write"
+    ]
+  },
+  "keywords": [
+    "vite",
+    "electron",
+    "typescript",
+    "remote",
+    "rollup"
+  ],
+  "license": "MIT"
+}

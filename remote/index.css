@@ -1,0 +1,246 @@
+body {
+  margin: 0;
+  background-color: dimgrey;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+html {
+  height: 100%;
+}
+
+#setting_btn {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: rgb(255, 255, 255);
+  width: 40px;
+  text-align: center;
+  height: 40px;
+  line-height: 40px;
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
+  cursor: pointer;
+  font-size: 22px;
+  transform: translate(0, -50%);
+}
+
+#top_bar {
+  background-color: #6e84a3;
+  color: white;
+  font: bold 12px Helvetica;
+  padding: 6px 5px 4px 5px;
+  border-bottom: 1px outset;
+}
+#status {
+  text-align: center;
+}
+#sendCtrlAltDelButton {
+  position: fixed;
+  top: 0px;
+  right: 0px;
+  border: 1px outset;
+  padding: 5px 5px 4px 5px;
+  cursor: pointer;
+}
+
+#screen {
+  flex: 1; /* fill remaining space */
+  overflow: hidden;
+}
+#setting-content {
+  position: absolute;
+  top: 50%;
+  left: 50px;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: rgb(255, 255, 255);
+  font-size: 14px;
+  transform: translate(0, -50%);
+  border-radius: 5px;
+  padding: 20px;
+  opacity: 0;
+  left: -50px;
+  pointer-events: none;
+}
+
+#setting-content.show {
+  pointer-events: all;
+  animation: moveAndShow 1s forwards;
+}
+
+@keyframes moveAndShow {
+  0% {
+    left: -50px;
+    opacity: 0;
+  }
+  100% {
+    left: 50px;
+    opacity: 1;
+  }
+}
+
+#setting-content.hide {
+  animation: moveAndHide 1s forwards;
+}
+
+@keyframes moveAndHide {
+  0% {
+    left: 50px;
+    opacity: 1;
+    pointer-events: all;
+  }
+  100% {
+    left: -50px;
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+#setting-content .title {
+  height: 30px;
+  line-height: 30px;
+  font-weight: 600;
+  font-size: 22px;
+  display: flex;
+  align-items: center;
+}
+
+#setting-content .title span {
+  margin-left: 5px;
+  font-size: 16px;
+}
+#setting-content .row {
+  margin-top: 15px;
+}
+
+#setting-content .row input {
+  cursor: pointer;
+}
+#setting-content .row span {
+  font-size: 22px;
+  font-weight: 600;
+  font-family: Courier New;
+  padding-left: 10px;
+}
+
+/* 定义CSS变量 */
+@property --c {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #0000;
+}
+
+/* 滑动条样式 */
+.glow {
+  --c: rgb(0, 255, 255, calc(0.25 + var(--val) / 125)); /* 设置颜色透明度 */
+  --c: hsl(160deg 80% 50% / calc(0.25 + var(--val) / 125)); /* 设置颜色透明度 */
+  -webkit-appearance: none; /* 移除默认样式 */
+  -moz-appearance: none; /* 移除默认样式 */
+  appearance: none; /* 移除默认样式 */
+  background: transparent; /* 背景透明 */
+  cursor: pointer; /* 鼠标指针为手型 */
+  width: 9rem; /* 宽度 */
+  position: relative; /* 相对定位 */
+}
+
+/* 滑动条前景样式 */
+.glow::before {
+  content: ""; /* 伪元素内容为空 */
+  position: absolute; /* 绝对定位 */
+  top: 0; /* 顶部对齐 */
+  left: 0; /* 左侧对齐 */
+  width: calc((var(--val)) * 10%); /* 宽度根据变量值计算 */
+  min-width: 0.5em; /* 最小宽度 */
+  height: 100%; /* 高度100% */
+  background: var(--c); /* 背景颜色 */
+  /* 阴影效果 */
+  box-shadow:
+    0 0 0.2em 0 hsl(0 0% 0%) inset,
+    -0.1em 0.1em 0.1em -0.1em hsl(0 0% 100% / 0.5),
+    0 0 calc(1em + 0.001em * var(--val)) calc(0.1em + 0.00025em * var(--val)) var(--c);
+  border-radius: 1em 0 0 1em; /* 边框圆角 */
+  aopacity: calc(20% + var(--val) * 1%); /* 透明度根据变量值计算 */
+}
+
+/* Track Styles */
+
+/* Chrome, Safari, Opera, and Edge Chromium */
+.glow::-webkit-slider-runnable-track {
+  /* 设置轨道样式 */
+  box-shadow:
+    0 0 0.2em 0 hsl(0 0% 0%) inset,
+    -0.1em 0.1em 0.1em -0.1em hsl(0 0% 100% / 0.5);
+  background: linear-gradient(to bottom right, #0001, #0000), #343133;
+  border-radius: 1em; /* 边框圆角 */
+  height: 1em; /* 高度 */
+}
+
+/* Firefox */
+.glow::-moz-range-track {
+  /* 设置轨道样式 */
+  box-shadow:
+    0 0 2px 0 hsl(0 0% 0%) inset,
+    -1px 1px 1px -1px hsl(0 0% 100% / 0.5);
+  background:
+    linear-gradient(var(--c) 0 0) 0 0 / calc(var(--val) * 1%) 100% no-repeat,
+    linear-gradient(to bottom right, #0001, #0000),
+    #343133;
+  border-radius: 1em; /* 边框圆角 */
+  height: 1em; /* 高度 */
+}
+
+/* Thumb Styles */
+
+/* Chrome, Safari, Opera, and Edge Chromium */
+.glow::-webkit-slider-thumb {
+  /* 设置滑块样式 */
+  --d: var(--c);
+  --d: rgb(from var(--c) r g b / calc(0.35 * var(--val) * 1%));
+  -webkit-appearance: none; /* 移除默认样式 */
+  appearance: none; /* 移除默认样式 */
+  background-color: #5cd5eb; /* 背景颜色 */
+  transform: translateY(calc(-50% + 0.5em)); /* 垂直居中 */
+  width: 25px; /* 宽度 */
+  height: 25px;
+  aspect-ratio: 1; /* 宽高比为1:1 */
+  border-radius: 50%; /* 边框圆角 */
+  /* 复合背景 */
+  background: #545153;
+  /* 阴影效果 */
+  box-shadow:
+    inset -0.15em -0.15em 0.2em #0008,
+    inset 0.15em 0.15em 0.2em #ffffff22,
+    inset calc(var(--val) * 1em / 500) 0em calc(var(--val) * 1em / 500) calc(var(--val) * -1em / 700) var(--c),
+    0.25em 0.25em 0.5em #0006,
+    calc(0.0125em * var(--val)) calc(0.005em * var(--val)) calc(0.02em * var(--val)) calc(-0.01em * var(--val)) #000a;
+  border-radius: 50%; /* 边框圆角 */
+}
+
+/* Firefox */
+.glow::-moz-range-thumb {
+  /* 设置滑块样式 */
+  border: none; /* 移除边框 */
+  -webkit-appearance: none; /* 移除默认样式 */
+  appearance: none; /* 移除默认样式 */
+  background-color: #5cd5eb; /* 背景颜色 */
+  width: 4px; /* 宽度 */
+  height: 4px; /* 高度 */
+  aspect-ratio: 1; /* 宽高比为1:1 */
+  background: red; /* 背景颜色 */
+  border-radius: 50%; /* 边框圆角 */
+  /* 复合背景 */
+  background:
+    radial-gradient(#0000 15%, #343133 16%, #545153 20%),
+    repeating-linear-gradient(#0000 0 10%, #0002 0 20%) 50% 50% / 25% 25% no-repeat,
+    repeating-linear-gradient(90deg, #0000 0 10%, #0002 0 20%) 50% 50% / 25% 25% no-repeat,
+    radial-gradient(var(--c) 17%, #0000 0),
+    #545153;
+  /* 阴影效果 */
+  box-shadow:
+    inset -0.15em -0.15em 0.2em #0008,
+    inset 0.15em 0.15em 0.2em #ffffff22,
+    inset calc(var(--val) * 1em / 500) 0em calc(var(--val) * 1em / 500) calc(var(--val) * -1em / 700) var(--c),
+    0.25em 0.25em 0.5em #0006,
+    calc(0.015em * var(--val)) calc(0.005em * var(--val)) calc(0.02em * var(--val)) calc(-0.01em * var(--val)) #0008;
+  border-radius: 50%; /* 边框圆角 */
+}
